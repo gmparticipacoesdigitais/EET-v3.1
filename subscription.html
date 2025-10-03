@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Assinatura - App</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:; connect-src 'self' https: http:; style-src 'self' 'unsafe-inline' https: http:; img-src 'self' data: https: http:;">
+    <style>
+      /* Subscription Page Styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .subscription-page {
+        min-height: 100vh;
+        padding: 2rem 0;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+
+      .page-header {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .page-header h1 {
+        color: #1a202c;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .page-header p {
+        color: #718096;
+        font-size: 1.125rem;
+      }
+
+      .btn-back {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .btn-back:hover {
+        color: #764ba2;
+      }
+
+      .status-section {
+        margin-bottom: 3rem;
+      }
+
+      .subscription-status {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .subscription-status-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+      }
+
+      .status-icon {
+        color: #cbd5e0;
+        margin-bottom: 1rem;
+      }
+
+      .subscription-status-card .subscription-status-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      .badge-success {
+        background: #c6f6d5;
+        color: #22543d;
+      }
+
+      .badge-danger {
+        background: #fed7d7;
+        color: #742a2a;
+      }
+
+      .badge-warning {
+        background: #feebc8;
+        color: #7c2d12;
+      }
+
+      .subscription-info {
+        margin-bottom: 1.5rem;
+      }
+
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f7fafc;
+      }
+
+      .info-label {
+        color: #718096;
+        font-weight: 600;
+      }
+
+      .info-value {
+        color: #1a202c;
+      }
+
+      .subscription-actions {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .plans-section {
+        margin-top: 3rem;
+      }
+
+      .plans-section h2 {
+        color: white;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 1.875rem;
+      }
+
+      .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .subscription-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+      }
+
+      .subscription-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .subscription-card.current-plan {
+        border: 2px solid #667eea;
+      }
+
+      .subscription-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .subscription-card-title {
+        font-size: 1.5rem;
+        color: #1a202c;
+      }
+
+      .subscription-card-price {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem 0;
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .subscription-card-price .amount {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .subscription-card-price .currency,
+      .subscription-card-price .interval {
+        color: #718096;
+        font-size: 1.125rem;
+      }
+
+      .subscription-card-features {
+        list-style: none;
+        margin-bottom: 2rem;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        color: #4a5568;
+      }
+
+      .feature-icon {
+        color: #48bb78;
+        flex-shrink: 0;
+      }
+
+      .subscription-card-button {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      .subscription-card-button:hover:not(:disabled) {
+        opacity: 0.9;
+      }
+
+      .subscription-card-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        display: inline-block;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-secondary {
+        background: #e2e8f0;
+        color: #4a5568;
+      }
+
+      .btn-danger {
+        background: #f56565;
+        color: white;
+      }
+
+      .btn-success {
+        background: #48bb78;
+        color: white;
+      }
+
+      .btn:hover {
+        opacity: 0.9;
+      }
+
+      .loading-spinner {
+        text-align: center;
+        padding: 2rem;
+        color: #718096;
+      }
+
+      .error-message {
+        background: #fed7d7;
+        color: #742a2a;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/pages/subscription.ts"></script>
+  </body>
+</html>
