@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
+    port: 8080,
+    watch: {
+      ignored: ['**/vite.config.ts', '**/vitest.config.ts'],
+    },
   },
 })
-

@@ -8,7 +8,7 @@ const app = express()
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' })
 
 // Desired port (used for initial fallback and messaging)
-const DESIRED_PORT = process.env.PORT ? Number(process.env.PORT) : 8080
+const DESIRED_PORT = process.env.PORT ? Number(process.env.PORT) : 8888
 // Public app URL (frontend). Do NOT use Vite client env here; prefer explicit app/front URLs.
 let PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || process.env.APP_URL || process.env.FRONTEND_URL || `http://localhost:${DESIRED_PORT}`
 
