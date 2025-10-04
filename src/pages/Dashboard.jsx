@@ -3,21 +3,43 @@ import { useOutletContext } from 'react-router-dom'
 import Card from '../components/Card'
 import EncargosPie from '../components/EncargosPie'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { calcularEncargosCompleto } from '../finance/calculadora-simplificada'
 
 export default function DashboardPage() {
   const { funcionarios } = useOutletContext()
 
   const kpis = useMemo(() => {
     const totals = { inss: 0, fgts: 0, terceiros: 0, rat: 0, prov: 0 }
-    for (const f of funcionarios) {
-      for (const r of f.relatorioMensal || []) {
-        totals.inss += r.encargos.inss
-        totals.fgts += r.encargos.fgts
-        totals.terceiros += r.encargos.terceiros
-        totals.rat += r.encargos.rat
-        totals.prov += r.provisoes.decimoTerceiro + r.provisoes.ferias + r.provisoes.tercoFerias + r.provisoes.fgtsProvisoes
+
+    // Se não houver funcionários, usar dados de exemplo
+    if (funcionarios.length === 0) {
+      // Exemplo: funcionário com salário de R$ 5.000 trabalhando desde janeiro
+      const exemplo = calcularEncargosCompleto({
+        nome: 'Exemplo - Adicione funcionários na aba "Funcionários"',
+        salarioBase: 5000,
+        dataEntrada: new Date(new Date().getFullYear(), 0, 1), // 1 de janeiro do ano atual
+        dataFinal: new Date(), // Hoje
+        setor: 'servicos'
+      })
+
+      totals.inss = exemplo.encargosAcumulados.inssPatronal
+      totals.fgts = exemplo.encargosAcumulados.fgts
+      totals.terceiros = exemplo.encargosAcumulados.terceiros
+      totals.rat = exemplo.encargosAcumulados.rat
+      totals.prov = exemplo.provisoesAcumuladas.total
+    } else {
+      // Usar dados dos funcionários cadastrados
+      for (const f of funcionarios) {
+        for (const r of f.relatorioMensal || []) {
+          totals.inss += r.encargos.inss
+          totals.fgts += r.encargos.fgts
+          totals.terceiros += r.encargos.terceiros
+          totals.rat += r.encargos.rat
+          totals.prov += r.provisoes.decimoTerceiro + r.provisoes.ferias + r.provisoes.tercoFerias + r.provisoes.fgtsProvisoes
+        }
       }
     }
+
     const total = totals.inss + totals.fgts + totals.terceiros + totals.rat + totals.prov
     return { ...totals, total }
   }, [funcionarios])
@@ -29,10 +51,20 @@ export default function DashboardPage() {
     { name: 'RAT', value: kpis.rat },
   ]), [kpis])
 
-  const bars = useMemo(() => (funcionarios.map((f) => ({
-    name: f.nome,
-    total: (f.relatorioMensal || []).reduce((acc, r) => acc + r.totalMes, 0)
-  }))), [funcionarios])
+  const bars = useMemo(() => {
+    if (funcionarios.length === 0) {
+      // Dados de exemplo
+      return [{
+        name: 'Exemplo (R$ 5.000)',
+        total: kpis.total
+      }]
+    }
+
+    return funcionarios.map((f) => ({
+      name: f.nome,
+      total: (f.relatorioMensal || []).reduce((acc, r) => acc + r.totalMes, 0)
+    }))
+  }, [funcionarios, kpis.total])
 
   const formatCurrency = (n) => {
     try { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n || 0) } catch { return `R$ ${(n||0).toFixed(2)}` }
