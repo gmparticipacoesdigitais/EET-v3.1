@@ -6,15 +6,11 @@ import Button from '../components/Button'
 import ToastStack from '../components/Toast.jsx'
 import '../styles/auth-enhanced.css'
 
-const DEV_EMAIL = (import.meta && import.meta.env && import.meta.env.VITE_DEV_EMAIL) || 'gmparticipacoes@gmail.com'
-const DEV_PASSWORD = (import.meta && import.meta.env && import.meta.env.VITE_DEV_PASSWORD) || 'gmparticipacoes1234!'
-
 export default function AuthPage() {
   const { login, register, user } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState('login')
-  const [form, setForm] = useState({ email: '', password: '', name: '', cpfCnpj: '', phone: '' })
-  const [rememberMe, setRememberMe] = useState(true)
+  const [form, setForm] = useState({ email: '', password: '', name: '', phone: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const errRef = useRef(null)
@@ -43,8 +39,9 @@ export default function AuthPage() {
         await login(form.email, form.password)
       } else {
         if (!form.name.trim()) throw new Error('Informe seu nome completo')
-        if (form.password.length < 8) throw new Error('A senha deve ter no mínimo 8 caracteres')
-        await register({ email: form.email, password: form.password, name: form.name.trim(), cpfCnpj: form.cpfCnpj, phone: form.phone })
+        if (!form.phone.trim()) throw new Error('Informe seu telefone')
+        if (form.password.length < 6) throw new Error('A senha deve ter no mínimo 6 caracteres')
+        await register({ email: form.email, password: form.password, name: form.name.trim(), phone: form.phone })
       }
       navigate('/dashboard')
     } catch (err) {
@@ -52,24 +49,6 @@ export default function AuthPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleDevLogin = async () => {
-    setError('')
-    setLoading(true)
-    try {
-      await login(DEV_EMAIL, DEV_PASSWORD)
-      navigate('/dashboard')
-    } catch (err) {
-      setError(err.message || 'Falha no login de desenvolvedor.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleWhatsAppReset = () => {
-    const txt = encodeURIComponent(`Olá! Quero recuperar minha senha no app. Meu e-mail: ${form.email || ''}`)
-    window.open(`https://api.whatsapp.com/send?text=${txt}`, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -83,10 +62,9 @@ export default function AuthPage() {
 
         <main className="auth-card" role="main" aria-labelledby="authTitle">
           <header className="auth-card__header">
-            <span className="auth-card__icon" aria-hidden="true" />
             <div>
               <h2 id="authTitle">{mode === 'login' ? 'Entrar na sua conta' : 'Criar uma nova conta'}</h2>
-              <p className="auth-card__subtitle">Use suas credenciais corporativas para acessar seus cálculos.</p>
+              <p className="auth-card__subtitle">Use suas credenciais para acessar seus cálculos.</p>
             </div>
           </header>
 
@@ -115,9 +93,6 @@ export default function AuthPage() {
             >
               Criar conta
             </button>
-            <button type="button" className="auth-tab auth-tab--ghost" onClick={handleDevLogin}>
-              Entrar Dev
-            </button>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -128,17 +103,9 @@ export default function AuthPage() {
                   name="name"
                   value={form.name}
                   onChange={onChange}
-                  placeholder="Digite como consta nos documentos"
+                  placeholder="Digite seu nome completo"
                   autoComplete="name"
                   required
-                />
-                <Input
-                  label="CPF ou CNPJ"
-                  name="cpfCnpj"
-                  value={form.cpfCnpj}
-                  onChange={onChange}
-                  placeholder="Somente números"
-                  autoComplete="off"
                 />
                 <Input
                   label="Telefone"
@@ -147,18 +114,19 @@ export default function AuthPage() {
                   onChange={onChange}
                   placeholder="DDD + número"
                   autoComplete="tel"
+                  required
                 />
               </fieldset>
             )}
 
             <fieldset className="auth-form__group" aria-label="Credenciais de acesso">
               <Input
-                label="E-mail corporativo"
+                label="E-mail"
                 name="email"
                 value={form.email}
                 onChange={onChange}
                 type="email"
-                placeholder="nome@empresa.com"
+                placeholder="seu@email.com"
                 autoComplete="email"
                 required
               />
@@ -168,46 +136,18 @@ export default function AuthPage() {
                 value={form.password}
                 onChange={onChange}
                 type="password"
-                placeholder="No mínimo 8 caracteres"
+                placeholder="No mínimo 6 caracteres"
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 required
               />
-              <label className="auth-remember">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(event) => setRememberMe(event.target.checked)}
-                />
-                <span>Manter sessão ativa neste dispositivo</span>
-              </label>
             </fieldset>
 
             <div className="auth-actions">
               <Button type="submit" variant="primary" disabled={loading} aria-live="polite">
-                {loading ? 'Aguarde...' : 'Continuar'}
-              </Button>
-              <Button type="button" variant="secondary" onClick={handleWhatsAppReset}>
-                Recuperar via WhatsApp
+                {loading ? 'Aguarde...' : (mode === 'login' ? 'Entrar' : 'Criar conta')}
               </Button>
             </div>
           </form>
-
-          <div className="auth-divider" role="separator" aria-label="ou" />
-
-          <div className="auth-alt">
-            <Button type="button" variant="secondary" className="btn-google" onClick={() => setError('Login com Google ainda não está disponível.')}>Entrar com Google</Button>
-            <button type="button" className="auth-link" onClick={() => setError('Link mágico por e-mail disponível em breve.')}>Usar link mágico por e-mail</button>
-          </div>
-
-          <footer className="auth-footer">
-            <div className="auth-footer__links">
-              <button type="button" className="auth-link" onClick={() => setError('Função em desenvolvimento.')}>Esqueci minha senha</button>
-              <span aria-hidden="true">·</span>
-              <a href="#" className="auth-link">Política de privacidade</a>
-              <span aria-hidden="true">·</span>
-              <a href="#" className="auth-link">Termos de uso</a>
-            </div>
-          </footer>
         </main>
       </div>
       <ToastStack />
